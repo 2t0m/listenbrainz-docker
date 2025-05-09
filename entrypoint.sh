@@ -28,6 +28,13 @@ echo "  DEEMIX_ARL=${DEEMIX_ARL}"
 # Configure cron for listenbrainz_sync.py
 if [ "$LISTENBRAINZ_CRON_ENABLED" = "True" ]; then
   echo "Configuring cron for listenbrainz_sync.py with schedule: ${LISTENBRAINZ_CRON_SCHEDULE}"
+  
+  echo "LOG_LEVEL=${LOG_LEVEL}" >> /etc/cron.d/lb-cron
+  echo "LISTENBRAINZ_URL=${LISTENBRAINZ_URL}" >> /etc/cron.d/lb-cron
+  echo "LISTENBRAINZ_M3U_FILENAME=${LISTENBRAINZ_M3U_FILENAME}" >> /etc/cron.d/lb-cron
+  echo "LISTENBRAINZ_BASE_PATH=${LISTENBRAINZ_BASE_PATH}" >> /etc/cron.d/lb-cron
+  echo "DEEMIX_ARL=${DEEMIX_ARL}" >> /etc/cron.d/lb-cron
+
   echo "${LISTENBRAINZ_CRON_SCHEDULE} /usr/local/bin/python3 /app/listenbrainz_sync.py >> /var/log/cron.log 2>&1" >> /etc/cron.d/lb-cron
 fi
 
