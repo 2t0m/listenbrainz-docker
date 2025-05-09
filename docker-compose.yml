@@ -1,8 +1,6 @@
 services:
   listenbrainz-docker:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: 2t0m/listenbrainz-docker:latest
     container_name: listenbrainz-docker
     volumes:
       - /mnt/usbhdd/music:/app/music  # Mount the local music directory to /app/music in the container
