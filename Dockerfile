@@ -1,29 +1,33 @@
-# Step to build the Docker image
 FROM python:3.9-slim
 
-# Install necessary dependencies, including cron and deemix
-RUN apt-get update && apt-get install -y \
+# Install system dependencies in one layer, with cleanup
+RUN apt-get update && apt-get install -y --no-install-recommends \
     cron \
     ffmpeg \
     git \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install deemix via pip
 RUN pip install --no-cache-dir deemix
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy necessary files into the image
-COPY listenbrainz_sync.py requirements.txt /app/
-COPY entrypoint.sh /app/entrypoint.sh
+# Copy only requirements.txt to leverage Docker cache
+COPY requirements.txt /app/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entrypoint script and set the correct permissions
+# Copy application files
+COPY listenbrainz_sync.py entrypoint.sh crontab /app/
+
+# Copy crontab file to cron directory and set permissions
+RUN cp /app/crontab /etc/cron.d/crontab && \
+    chmod 0644 /etc/cron.d/crontab
+
+# Make entrypoint script executable
 RUN chmod +x /app/entrypoint.sh
 
-# Set the default command
-CMD ["/app/entrypoint.sh"]
+# Set the entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
