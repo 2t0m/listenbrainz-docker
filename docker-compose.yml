@@ -8,7 +8,7 @@ services:
       LOG_LEVEL: "DEBUG"                        # Logging level for the application (e.g., DEBUG, INFO, WARNING, ERROR)
       LISTENBRAINZ_RUN_ONCE: "True"             # Run the playlist synchronization script immediately at container startup
       LISTENBRAINZ_CRON_ENABLED: "True"         # Enable scheduled execution via cron
-      LISTENBRAINZ_CRON_SCHEDULE: "30 1 * * *"  # Cron schedule for running the script (default: every 30 minutes)
+      LISTENBRAINZ_CRON_SCHEDULE: "30 0 * * *"  # Cron schedule for running the script (default: every 30 minutes)
       LISTENBRAINZ_URL: "https://listenbrainz.org/syndication-feed/user/YOUR_USERNAME/recommendations?recommendation_type=weekly-exploration"
       LISTENBRAINZ_M3U_FILENAME: "@Created for You.m3u8"
       LISTENBRAINZ_BASE_PATH: "/app/music"      # Base path for playlist files
