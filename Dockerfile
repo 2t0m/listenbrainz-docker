@@ -1,7 +1,7 @@
 FROM python:3.9-slim
 
 # Install system dependencies in one layer, with cleanup
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     cron \
     ffmpeg \
     git \
