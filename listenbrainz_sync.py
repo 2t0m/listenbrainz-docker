@@ -273,6 +273,19 @@ def append_to_m3u(filepath, m3u_filename="@Created for You.m3u8"):
         m3u_file.write(f"{filename}\n")
     log(f"✅ File added to the playlist: {filename}", "INFO")
 
+def clear_m3u_content(m3u_filename=M3U_FILENAME):
+    """
+    Remove all entries from the .m3u8 file except the header lines.
+    """
+    m3u_filepath = os.path.join(BASE_PATH, m3u_filename)
+    if not os.path.exists(m3u_filepath):
+        return
+    with open(m3u_filepath, "r", encoding="utf-8") as m3u_file:
+        lines = m3u_file.readlines()
+    header_lines = [line for line in lines if line.startswith("#")]
+    with open(m3u_filepath, "w", encoding="utf-8") as m3u_file:
+        m3u_file.writelines(header_lines)
+
 def main():
     """
     Main function to synchronize playlists from ListenBrainz and download songs using Deemix.
@@ -295,6 +308,7 @@ def main():
             return
 
         ensure_m3u_header(M3U_FILENAME, updated_date)
+        clear_m3u_content(M3U_FILENAME)
 
         recommendations = fetch_recommendations(url)
         if not recommendations:
@@ -303,8 +317,6 @@ def main():
 
         template = "%artist% - %title%"
         download_with_deemix_cli(recommendations, template, M3U_FILENAME)
-
-        remove_duplicates_from_m3u(M3U_FILENAME)
 
         log("Synchronization completed successfully.", "INFO")
     except Exception as e:
