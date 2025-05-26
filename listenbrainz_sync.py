@@ -224,31 +224,6 @@ def ensure_m3u_header(m3u_filename=M3U_FILENAME, updated_date=None):
 
     log(f"Updated header with date: {updated_date}")
 
-def remove_duplicates_from_m3u(m3u_filename=M3U_FILENAME):
-    """
-    Remove duplicate entries from the .m3u8 file while preserving order.
-    """
-    m3u_filepath = os.path.join(BASE_PATH, m3u_filename)
-
-    if not os.path.exists(m3u_filepath):
-        log(f"File {m3u_filename} does not exist. No duplicates to remove.", "WARNING")
-        return
-
-    with open(m3u_filepath, "r", encoding="utf-8") as m3u_file:
-        lines = m3u_file.readlines()
-
-    unique_lines = []
-    seen = set()
-    for line in lines:
-        if line not in seen:
-            unique_lines.append(line)
-            seen.add(line)
-
-    with open(m3u_filepath, "w", encoding="utf-8") as m3u_file:
-        m3u_file.writelines(unique_lines)
-
-    log(f"Removed duplicates from file: {m3u_filename}")
-
 def append_to_m3u(filepath, m3u_filename="@Created for You.m3u8"):
     """
     Append a file path to the .m3u8 playlist file if it is not already present.
@@ -307,16 +282,17 @@ def main():
             log("Playlist is already up to date. No synchronization needed.", "INFO")
             return
 
-        ensure_m3u_header(M3U_FILENAME, updated_date)
-        clear_m3u_content(M3U_FILENAME)
-
         recommendations = fetch_recommendations(url)
         if not recommendations:
             log("No recommendations found.", "WARNING")
             return
 
+        clear_m3u_content(M3U_FILENAME)
+
         template = "%artist% - %title%"
         download_with_deemix_cli(recommendations, template, M3U_FILENAME)
+
+        ensure_m3u_header(M3U_FILENAME, updated_date)
 
         log("Synchronization completed successfully.", "INFO")
     except Exception as e:
