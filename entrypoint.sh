@@ -36,13 +36,12 @@ if [ "$LISTENBRAINZ_CRON_ENABLED" = "True" ]; then
   echo "DEEMIX_ARL=${DEEMIX_ARL}" >> /etc/cron.d/lb-cron
 
   echo "${LISTENBRAINZ_CRON_SCHEDULE} /usr/local/bin/python3 /app/listenbrainz_sync.py >> /var/log/cron.log 2>&1" >> /etc/cron.d/lb-cron
-fi
 
-# Apply cron configuration
-chmod 0644 /etc/cron.d/lb-cron
-crontab /etc/cron.d/lb-cron
-touch /var/log/cron.log
-echo "Cron configured."
+  chmod 0644 /etc/cron.d/lb-cron
+  crontab /etc/cron.d/lb-cron
+  touch /var/log/cron.log
+  echo "Cron configured."
+fi
 
 # Start the cron daemon in the background
 echo "Starting cron daemon..."
@@ -51,7 +50,7 @@ service cron start
 # Execute listenbrainz_sync.py immediately if LISTENBRAINZ_RUN_ONCE is enabled
 if [ "$LISTENBRAINZ_RUN_ONCE" = "True" ]; then
   echo "LISTENBRAINZ_RUN_ONCE is enabled. Running listenbrainz_sync.py immediately..."
-  /usr/local/bin/python3 /app/listenbrainz_sync.py
+  /usr/local/bin/python3 /app/listenbrainz_sync.py --source immediate
 fi
 
 # Keep the container running

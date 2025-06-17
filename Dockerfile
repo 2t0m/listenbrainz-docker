@@ -29,5 +29,8 @@ RUN cp /app/crontab /etc/cron.d/crontab && \
 # Make entrypoint script executable
 RUN chmod +x /app/entrypoint.sh
 
+# Set environment path
+ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
+
 # Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]

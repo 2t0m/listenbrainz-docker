@@ -5,6 +5,10 @@ import html
 import os
 import time
 import re
+import sys
+
+# Add /root/.local/bin and /usr/local/bin to the PATH
+os.environ["PATH"] = "/root/.local/bin:/usr/local/bin:" + os.environ.get("PATH", "")
 
 # Define the base path for music files and the .m3u8 playlist file
 BASE_PATH = os.getenv("LISTENBRAINZ_BASE_PATH", "/app/music/")
@@ -137,7 +141,7 @@ def search_deezer_url(artist_name, song_title):
 
         log(f"Deezer API response for '{query}': {str(data)[:100]}", "DEBUG")
 
-        if data["data"]:
+        if "data" in data and data["data"]:
             link = data["data"][0]["link"]
             log(f"Found Deezer link: {link}", "INFO")
             return link
@@ -151,7 +155,7 @@ def search_deezer_url(artist_name, song_title):
                 response = retry_request(base_url, params={"q": query}, max_retries=3, delay=5)
                 data = response.json()
 
-                if data["data"]:
+                if "data" in data and data["data"]:
                     link = data["data"][0]["link"]
                     log(f"Found Deezer link: {link}", "INFO")
                     return link
@@ -243,7 +247,7 @@ def append_to_m3u(filepath, m3u_filename="@Created for You.m3u8"):
         log(f"⚠️ File already exists in the playlist: {filename}", "WARNING")
         return
 
-    # Append the file to the .m3u8
+    # Append the file to the .m3u
     with open(m3u_filepath, "a", encoding="utf-8") as m3u_file:
         m3u_file.write(f"{filename}\n")
     log(f"✅ File added to the playlist: {filename}", "INFO")
@@ -260,6 +264,15 @@ def clear_m3u_content(m3u_filename=M3U_FILENAME):
     header_lines = [line for line in lines if line.startswith("#")]
     with open(m3u_filepath, "w", encoding="utf-8") as m3u_file:
         m3u_file.writelines(header_lines)
+
+def get_source_arg():
+    for i, arg in enumerate(sys.argv):
+        if arg == "--source" and i + 1 < len(sys.argv):
+            return sys.argv[i + 1]
+    return "unknown"
+
+source = get_source_arg()
+log(f"Script started from: {source.upper()}", "INFO")
 
 def main():
     """
