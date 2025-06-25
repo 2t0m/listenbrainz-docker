@@ -1,3 +1,0 @@
-# Cron job configuration for running the Python scripts periodically
-
-${LISTENBRAINZ_CRON_SCHEDULE} /usr/local/bin/python3 /app/listenbrainz_sync.py --source cron >> /var/log/cron.log 2>&1

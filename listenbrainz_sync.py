@@ -6,6 +6,7 @@ import os
 import time
 import re
 import sys
+import datetime
 
 # Add /root/.local/bin and /usr/local/bin to the PATH
 os.environ["PATH"] = "/root/.local/bin:/usr/local/bin:" + os.environ.get("PATH", "")
@@ -13,15 +14,17 @@ os.environ["PATH"] = "/root/.local/bin:/usr/local/bin:" + os.environ.get("PATH",
 # Define the base path for music files and the .m3u8 playlist file
 BASE_PATH = os.getenv("LISTENBRAINZ_BASE_PATH", "/app/music/")
 M3U_FILENAME = os.getenv("LISTENBRAINZ_M3U_FILENAME", "@Created for You.m3u8")
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()  # Default to INFO if not set
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+SYNC_INTERVAL = int(os.getenv("SYNC_INTERVAL", "86400"))
 
 def log(message, level="INFO"):
     """
-    Log messages based on the specified log level.
+    Log messages based on the specified log level, with date and time.
     """
     levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
     if levels.index(level) >= levels.index(LOG_LEVEL):
-        print(f"[{level}] {message}")
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{now}] [{level}] {message}", flush=True)
 
 def retry_request(url, params=None, max_retries=3, delay=5):
     """
@@ -169,6 +172,7 @@ def search_deezer_url(artist_name, song_title):
 def download_with_deemix_cli(recommendations, template, m3u_filename, dry_run=False):
     """
     Download songs using the Deemix CLI and append their paths to the .m3u8 file.
+    Returns the number of successful downloads.
     """
     arl = os.getenv("DEEMIX_ARL")
     if not arl:
@@ -178,6 +182,8 @@ def download_with_deemix_cli(recommendations, template, m3u_filename, dry_run=Fa
     os.makedirs(os.path.dirname(deemix_arl_path), exist_ok=True)
     with open(deemix_arl_path, "w") as arl_file:
         arl_file.write(arl)
+
+    success_count = 0
 
     for rec in recommendations:
         song_url = rec['song_url']
@@ -196,16 +202,16 @@ def download_with_deemix_cli(recommendations, template, m3u_filename, dry_run=Fa
                 check=True
             )
             log(f"Download result: {result.stdout}", "DEBUG")
-
-            # Extract the downloaded file path from the Deemix output
             for line in result.stdout.splitlines():
                 if "Completed download of" in line:
                     downloaded_file = line.split("Completed download of ")[1].strip()
                     log(f"Adding downloaded file to .m3u8: {downloaded_file}", "DEBUG")
                     append_to_m3u(downloaded_file, m3u_filename)
+                    success_count += 1
         except subprocess.CalledProcessError as e:
             log(f"Error downloading {rec['song_title']}: {e}", "ERROR")
             log(e.stderr, "DEBUG")
+    return success_count
 
 def ensure_m3u_header(m3u_filename=M3U_FILENAME, updated_date=None):
     """
@@ -265,15 +271,6 @@ def clear_m3u_content(m3u_filename=M3U_FILENAME):
     with open(m3u_filepath, "w", encoding="utf-8") as m3u_file:
         m3u_file.writelines(header_lines)
 
-def get_source_arg():
-    for i, arg in enumerate(sys.argv):
-        if arg == "--source" and i + 1 < len(sys.argv):
-            return sys.argv[i + 1]
-    return "unknown"
-
-source = get_source_arg()
-log(f"Script started from: {source.upper()}", "INFO")
-
 def main():
     """
     Main function to synchronize playlists from ListenBrainz and download songs using Deemix.
@@ -303,13 +300,17 @@ def main():
         clear_m3u_content(M3U_FILENAME)
 
         template = "%artist% - %title%"
-        download_with_deemix_cli(recommendations, template, M3U_FILENAME)
-
+        success_count = download_with_deemix_cli(recommendations, template, M3U_FILENAME)
         ensure_m3u_header(M3U_FILENAME, updated_date)
-
-        log("Synchronization completed successfully.", "INFO")
+        if success_count > 0:
+            log(f"Synchronization completed successfully. {success_count} tracks downloaded.", "INFO")
+        else:
+            log("Synchronization completed, but no tracks were downloaded successfully.", "WARNING")
     except Exception as e:
         log(f"An error occurred: {e}", "ERROR")
 
 if __name__ == "__main__":
-    main()
+    while True:
+        main()
+        log(f"Waiting {SYNC_INTERVAL} seconds before next sync...", "INFO")
+        time.sleep(SYNC_INTERVAL)

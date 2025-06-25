@@ -3,17 +3,12 @@ services:
     image: ghcr.io/2t0m/listenbrainz-docker:latest
     container_name: listenbrainz-docker
     volumes:
-      - /mnt/usbhdd/music:/app/music            # Mount the local music directory to /app/music in the container
+      - /mnt/usbhdd/music:/app/music
     environment:
-      LOG_LEVEL: "DEBUG"                        # Logging level for the application (e.g., DEBUG, INFO, WARNING, ERROR)
-      LISTENBRAINZ_RUN_ONCE: "True"             # Run the playlist synchronization script immediately at container startup
-      LISTENBRAINZ_CRON_ENABLED: "True"         # Enable scheduled execution via cron
-      LISTENBRAINZ_CRON_SCHEDULE: "30 * * * *"  # Cron schedule for running the script (default: every 30 minutes)
+      LOG_LEVEL: "DEBUG"
       LISTENBRAINZ_URL: "https://listenbrainz.org/syndication-feed/user/YOUR_USERNAME/recommendations?recommendation_type=weekly-exploration"
       LISTENBRAINZ_M3U_FILENAME: "@Created for You.m3u8"
-      LISTENBRAINZ_BASE_PATH: "/app/music"      # Base path for playlist files
-
-      DEEMIX_ARL: "YOUR_ARL_HERE"               # Replace with your actual ARL value
-
-    entrypoint: ["/app/entrypoint.sh"]          # Entrypoint script to set up cron and start the application
+      LISTENBRAINZ_BASE_PATH: "/app/music"
+      DEEMIX_ARL: "YOUR_ARL_HERE"
+      SYNC_INTERVAL: 86400
     restart: always

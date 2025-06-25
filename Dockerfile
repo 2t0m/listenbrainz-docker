@@ -20,17 +20,11 @@ COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
-COPY listenbrainz_sync.py entrypoint.sh crontab /app/
-
-# Copy crontab file to cron directory and set permissions
-RUN cp /app/crontab /etc/cron.d/crontab && \
-    chmod 0644 /etc/cron.d/crontab
-
-# Make entrypoint script executable
-RUN chmod +x /app/entrypoint.sh
+COPY listenbrainz_sync.py /app/
+COPY config.json /app/config/config.json
 
 # Set environment path
 ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
 
-# Set the entrypoint
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Set the entrypoint directly to Python script
+ENTRYPOINT ["python3", "/app/listenbrainz_sync.py"]
