@@ -26,7 +26,7 @@
   "overwriteFile": "n",
   "createM3U8File": false,
   "playlistFilenameTemplate": "playlist",
-  "syncedLyrics": false,
+  "syncedLyrics": true,
   "embeddedArtworkSize": 800,
   "embeddedArtworkPNG": false,
   "localArtworkSize": 1400,
