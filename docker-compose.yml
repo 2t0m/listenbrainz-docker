@@ -1,0 +1,39 @@
+services:
+  listenbrainz-docker:
+    image: ghcr.io/2t0m/listenbrainz-docker:latest
+    container_name: listenbrainz-docker
+    volumes:
+      - /mnt/usbhdd/music:/app/music
+    environment:
+      LOG_LEVEL: "DEBUG"
+      LISTENBRAINZ_BASE_PATH: "/app/music"
+      # Configuration for multiple playlists (JSON format)
+      # Replace YOUR_USERNAME with your actual ListenBrainz username
+      LISTENBRAINZ_PLAYLISTS: |
+        [
+          {
+            "url": "https://listenbrainz.org/syndication-feed/user/YOUR_USERNAME/recommendations?recommendation_type=weekly-exploration",
+            "m3u_filename": "@Created for You - Weekly Exploration.m3u8"
+          },
+          {
+            "url": "https://listenbrainz.org/syndication-feed/user/YOUR_USERNAME/recommendations?recommendation_type=top-discoveries-of-the-year",
+            "m3u_filename": "@Created for You - Top Discoveries.m3u8"
+          },
+          {
+            "url": "https://listenbrainz.org/syndication-feed/user/YOUR_USERNAME/recommendations?recommendation_type=similar-users",
+            "m3u_filename": "@Created for You - Similar Users.m3u8"
+          },
+          {
+            "url": "https://listenbrainz.org/syndication-feed/user/YOUR_USERNAME/recommendations?recommendation_type=daily-discovery",
+            "m3u_filename": "@Created for You - Daily Discovery.m3u8"
+          },
+          {
+            "url": "https://listenbrainz.org/syndication-feed/user/YOUR_USERNAME/recommendations?recommendation_type=fresh-releases",
+            "m3u_filename": "@Created for You - Fresh Releases.m3u8"
+          }
+        ]
+      # Get your ARL token from Deezer (see documentation)
+      DEEMIX_ARL: "YOUR_ARL_HERE"
+      # Sync interval in seconds (86400 = 24 hours)
+      SYNC_INTERVAL: 86400
+    restart: always

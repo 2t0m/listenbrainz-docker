@@ -1,0 +1,27 @@
+# Fichiers de configuration sensibles
+.env
+docker-compose.override.yml
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# VS Code (sauf settings partagés)
+.vscode/sftp.json
+
+# Système
+.DS_Store
+Thumbs.db
+
+# Fichiers temporaires
+*.tmp
+*.swp
+*~
+
+# Dossiers de cache
+node_modules/
+.cache/

@@ -1,0 +1,2 @@
+requests>=2.31.0,<3.0.0  # For making HTTP requests to the API
+mutagen==1.46.0          # For managing MP3 file metadata
